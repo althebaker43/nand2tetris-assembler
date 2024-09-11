@@ -1,0 +1,14 @@
+
++ scala.io.Source.fromFile(java.io.File)
++ scala.io.Source.fromString(String)
++ scala.io.Source.getLines() returns Iterator[String]
++ String is thin wrapper around java.lang.String
++ Iterator.zipWithIndex() returns Iterator[(String, Int)]
++ getLabels() yields (String, Int)
++ Advance program counter?
++ Line filter
+  + Discards comments, blank lines
+  + Combines labels with next line
++ Recursive line processor
+  + getLabels(Iterator[String], pc : Int) : Map[(String, Int)]
+  + Tail recursive
