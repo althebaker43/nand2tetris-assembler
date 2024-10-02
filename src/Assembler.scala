@@ -34,15 +34,19 @@ object Assembler {
   def getInstructions(srcLineIter : Iterator[String], labels : Map[String, Int], addrs : Map[String, Int], instrs : List[String]) : List[String] = {
     if srcLineIter.hasNext == false then return instrs.reverse
     val srcLine = srcLineIter.next().strip()
+    val newAddrs = if (isInstruction(srcLine) && srcLine.startsWith("@")) then
+      getNewAddresses(srcLine, labels, addrs)
+    else
+      addrs
     val newInstrs = if isInstruction(srcLine) then {
       if srcLine.startsWith("@") then
-        getAInstruction(srcLine, labels, addrs) :: instrs
+        getAInstruction(srcLine, labels, newAddrs) :: instrs
       else
         getCInstruction(srcLine) :: instrs
     } else {
       instrs
     }
-    getInstructions(srcLineIter, labels, addrs, newInstrs)
+    getInstructions(srcLineIter, labels, newAddrs, newInstrs)
   }
 
   def getAddrStr(addr : Int, bitIdx : Int) : String = {
@@ -62,16 +66,23 @@ object Assembler {
     val label = instrStr.substring(1)
     val labelAddr = if labels.contains(label) then
       labels(label)
+    else if addrs.contains(label) then
+      addrs(label)
     else
-      try
-        label.toInt
-      catch
-        case e : NumberFormatException => {
-          val newAddr = addrs.size
-          // addrs(label) = newAddr
-          newAddr
-        }
+      label.toInt
     "0" + getAddrStr(labelAddr, 14)
+  }
+
+  def getNewAddresses(instrStr : String, labels : Map[String, Int], addrs : Map[String, Int]) : Map[String, Int] = {
+    val target = instrStr.substring(1)
+    if labels.contains(target) then
+      addrs
+    else
+      try {
+        target.toInt
+        addrs
+      } catch
+        case e : NumberFormatException => addrs + (target -> addrs.size)
   }
 
   def getCInstruction(instrStr : String) : String = {
