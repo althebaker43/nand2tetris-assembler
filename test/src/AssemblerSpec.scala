@@ -50,4 +50,16 @@ class AssemblerSpec extends AnyFlatSpec {
     assert(instrArr(6) == "0000000000000110")
     assert(instrArr(8) == "0000000000000001")
   }
+
+  it should "assemble C instructions" in {
+
+    val lineIter = Source.fromString(listing).getLines()
+    val instrs = Assembler.getInstructions(srcLineIter=lineIter, labels=labels, addrs=Map(), instrs=Nil)
+    val instrArr = Array.from(instrs)
+
+    assert(instrArr.length == 9)
+    assert(instrArr(1) == "1110101010000111")
+    assert(instrArr(3) == "1111110000010000")
+    assert(instrArr(5) == "1110001100001000")
+  }
 }
