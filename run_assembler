@@ -1,0 +1,3 @@
+#!/usr/bin/bash
+
+scala -classpath out/jar.dest/out.jar assembler.Assembler $1 $2

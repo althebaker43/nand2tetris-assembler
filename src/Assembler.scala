@@ -2,12 +2,16 @@ package assembler
 
 import scala.io.Source
 import java.io.File
+import java.io.PrintWriter
 
 object Assembler {
 
   def main(args : Array[String]) : Unit = {
     val labels = getLabels(Source.fromFile(File(args(0))).getLines(), 1, 0)
-    print(labels)
+    val instrs = getInstructions(Source.fromFile(File(args(0))).getLines(), labels, addrs=Map(), instrs=Nil)
+    val instrWriter = PrintWriter(args(1))
+    for instr <- instrs do instrWriter.println(instr)
+    instrWriter.close()
   }
 
   def getLabels(srcLineIter : Iterator[String], lineNum : Int, pc : Int) : Map[String, Int] = {
