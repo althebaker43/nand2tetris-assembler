@@ -7,20 +7,30 @@ import java.io.PrintWriter
 object Assembler {
 
   def main(args : Array[String]) : Unit = {
-    val labels = getLabels(Source.fromFile(File(args(0))).getLines(), 1, 0)
+    val predefinedLabels = Map(
+      "SP" -> 0,
+      "LCL" -> 1,
+      "ARG" -> 2,
+      "THIS" -> 3,
+      "THAT" -> 4,
+      "SCREEN" -> 0x4000,
+      "KBD" -> 0x6000
+    )
+    val registers = for i <- 0 to 15 yield (("R" + i.toString()) -> i)
+    val labels = getLabels(Source.fromFile(File(args(0))).getLines(), 1, 0, predefinedLabels ++ registers.toMap)
     val instrs = getInstructions(Source.fromFile(File(args(0))).getLines(), labels, addrs=Map(), instrs=Nil)
     val instrWriter = PrintWriter(args(1))
     for instr <- instrs do instrWriter.println(instr)
     instrWriter.close()
   }
 
-  def getLabels(srcLineIter : Iterator[String], lineNum : Int, pc : Int) : Map[String, Int] = {
+  def getLabels(srcLineIter : Iterator[String], lineNum : Int, pc : Int, labels : Map[String, Int]) : Map[String, Int] = {
     if srcLineIter.hasNext == false then
-      return Map()
+      return labels
     val srcLine = srcLineIter.next().strip()
     val newLabel = if srcLine.startsWith("(") then Map(srcLine.substring(1, srcLine.length()-1) -> pc) else Map()
     val newPC = if isInstruction(srcLine) then pc+1 else pc
-    newLabel ++ getLabels(srcLineIter, lineNum+1, newPC)
+    getLabels(srcLineIter, lineNum+1, newPC, newLabel ++ labels)
   }
 
   def isInstruction(line : String) : Boolean = {
@@ -85,12 +95,14 @@ object Assembler {
     val target = instrStr.substring(1)
     if labels.contains(target) then
       addrs
+    else if addrs.contains(target) then
+      addrs
     else
       try {
         target.toInt
         addrs
       } catch
-        case e : NumberFormatException => addrs + (target -> addrs.size)
+        case e : NumberFormatException => addrs + (target -> (addrs.size + 0x0010))
   }
 
   def getCInstruction(instrStr : String) : String = {

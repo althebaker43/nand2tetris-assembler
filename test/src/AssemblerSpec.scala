@@ -25,7 +25,7 @@ class AssemblerSpec extends AnyFlatSpec {
   "The assembler" should "find the labels" in {
 
     val lineIter = Source.fromString(listing).getLines()
-    val labels = Assembler.getLabels(lineIter, 1, 0)
+    val labels = Assembler.getLabels(lineIter, 1, 0, Map())
 
     assert(labels.isEmpty == false)
     assert(labels.contains("OUTPUT_FIRST"))
@@ -45,10 +45,10 @@ class AssemblerSpec extends AnyFlatSpec {
 
     assert(instrArr.length == 9)
     assert(instrArr(0) == "0000000000000100")
-    assert(instrArr(2) == "0000000000000000")
+    assert(instrArr(2) == "0000000000010000")
     assert(instrArr(4) == "0000000000000010")
     assert(instrArr(6) == "0000000000000110")
-    assert(instrArr(8) == "0000000000000001")
+    assert(instrArr(8) == "0000000000010001")
   }
 
   it should "assemble C instructions" in {
