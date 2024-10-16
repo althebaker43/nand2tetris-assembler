@@ -1,3 +1,9 @@
 #!/usr/bin/bash
 
-scala -classpath out/jar.dest/out.jar assembler.Assembler $1 $2
+#if ! scala -classpath out/jar.dest/out.jar assembler.Assembler $1 $2
+if ! bloop run root-module --args $1 --args $2
+then
+    exit $?
+fi
+
+diff -u $3 $2
